@@ -34,7 +34,7 @@ public class ObjectCreator {
         int test = 1;
         boolean bool = true;
 
-        Document doc = serial.serialize(new Objects());
+        Document doc = serial.serialize(new Collection());
         XMLOutputter xml = new XMLOutputter();
         xml.setFormat(Format.getPrettyFormat());
         String data = xml.outputString(doc);

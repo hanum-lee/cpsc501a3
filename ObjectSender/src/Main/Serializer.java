@@ -29,7 +29,6 @@ public class Serializer {
         Class objClass = obj.getClass();
 
         if (serializedMap.containsKey(obj)) {
-
             return serializedMap.get(obj);
         }
 
@@ -47,7 +46,8 @@ public class Serializer {
             System.out.println("Primitive");
             serializePrimitive(obj,objEle);
         }else if (objClass.equals(ArrayList.class)){
-            serializeArray((ArrayList)obj,objEle);
+            ArrayList arraylist = (ArrayList)obj;
+            serializeArray(arraylist.toArray(),objEle);
         }else{
             serializeObj(obj,objEle);
         }
