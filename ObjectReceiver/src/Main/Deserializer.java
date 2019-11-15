@@ -1,6 +1,7 @@
 package Main;
 import org.jdom2.*;
 
+import java.lang.reflect.Array;
 import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -19,7 +20,7 @@ public class Deserializer {
             getObject(e);
         }
         for(Element e: objElements){
-
+            getReferences(e);
         }
 
         return objects[1];
@@ -128,6 +129,62 @@ public class Deserializer {
         return null;
     }
 
+    private void getReferences(Element e) throws Exception {
+        Class c = getObjectClass(e);
+
+        if(c.isPrimitive() || isType(c)){
+            return;
+        }
+
+        int id = Integer.parseInt(e.getAttribute("id").getValue());
+        Object obj = objects[id];
+        if(c.isArray()){
+            if(c.getComponentType().isPrimitive()){
+                return;
+            }
+
+            int length = Integer.parseInt(e.getAttribute("length").getValue());
+            List<Element> childFields = e.getChildren();
+            for(int i = 0; i < length;i++){
+                Element el = childFields.get(i);
+                Array.set(obj,i,objects[Integer.parseInt(el.getValue())]);
+            }
+        } else if (c.equals(ArrayList.class)){
+            ArrayList classArray = (ArrayList)obj;
+            List<Element> childFields = e.getChildren();
+            int length = childFields.size();
+            for(int i = 0; i < length;i++){
+                Element el = childFields.get(i);
+                classArray.set(i,objects[Integer.parseInt(el.getValue())]);
+            }
+        }else{
+            List<Element> childFields = e.getChildren();
+            for(Element el: childFields){
+                loadFieldReference(obj,e);
+            }
+        }
+
+    }
+
+    private void loadFieldReference(Object obj, Element e) throws ClassNotFoundException, NoSuchFieldException, IllegalAccessException {
+        Class declaringClass = getDeclaringClass(e);
+        Class currentClass = findParentClass(obj.getClass(), declaringClass);
+
+        String fieldName = e.getAttributeValue("name");
+        Field fieldSet = currentClass.getDeclaredField(fieldName);
+
+        Class fieldType = fieldSet.getType();
+
+        if(fieldType.isPrimitive()){
+            fieldSet.setAccessible(true);
+            List<Element> elements = e.getChildren();
+            Element value = elements.get(0);
+            String referenceValue = value.getValue();
+            int id = Integer.parseInt(referenceValue);
+            fieldSet.set(obj,objects[id]);
+        }
+
+    }
 
     private boolean isType(Class clas){
         HashSet<Class<?>> types = new HashSet<>(
