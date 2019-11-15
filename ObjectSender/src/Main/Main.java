@@ -7,9 +7,11 @@ public class Main {
 
     public static void main(String[] args) throws IOException {
 	// write your code here
-        //Socket socket = new Socket("localhost",5000);
-        //DataOutputStream output = new DataOutputStream(socket.getOutputStream());
+        Socket socket = new Socket("localhost",5000);
+        DataOutputStream output = new DataOutputStream(socket.getOutputStream());
         ObjectCreator objcre = new ObjectCreator();
         String data = objcre.primitiveObj();
+        output.write(data.getBytes());
+        socket.close();
     }
 }
