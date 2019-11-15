@@ -2,7 +2,6 @@ package Main;
 import org.jdom2.*;
 import org.jdom2.output.Format;
 import org.jdom2.output.XMLOutputter;
-
 import java.util.ArrayList;
 
 
@@ -29,7 +28,7 @@ public class ObjectCreator {
         public ArrayList<Object> array = new ArrayList<>();
     }
 
-    public void primitiveObj(){
+    public String primitiveObj(){
         Serializer serial = new Serializer();
         int test = 1;
         boolean bool = true;
@@ -39,6 +38,7 @@ public class ObjectCreator {
         xml.setFormat(Format.getPrettyFormat());
         String data = xml.outputString(doc);
         System.out.println(data);
+        return data;
     }
 
 

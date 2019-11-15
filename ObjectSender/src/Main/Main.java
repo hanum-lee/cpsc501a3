@@ -10,6 +10,6 @@ public class Main {
         //Socket socket = new Socket("localhost",5000);
         //DataOutputStream output = new DataOutputStream(socket.getOutputStream());
         ObjectCreator objcre = new ObjectCreator();
-        objcre.primitiveObj();
+        String data = objcre.primitiveObj();
     }
 }
