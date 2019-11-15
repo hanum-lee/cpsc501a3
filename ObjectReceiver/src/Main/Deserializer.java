@@ -3,6 +3,8 @@ import org.jdom2.*;
 
 import java.lang.reflect.Array;
 import java.lang.reflect.Field;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
@@ -60,14 +62,15 @@ public class Deserializer {
     private Object createObject(Class c, Element e) throws Exception{
         Object obj = null;
         if(c.isArray()){
-
+            obj = createArray(c,e);
         }else if(c.isPrimitive() || isType(c)){
-
+            obj = createPrimitive(c,e);
         }else if(c.equals(ArrayList.class)){
-
+            obj = createArrayList(e);
         }else{
-
+            obj = createObjectTypes(c,e);
         }
+        return obj;
     }
 
     private Object createObjectTypes(Class c, Element e)throws Exception{
@@ -184,6 +187,44 @@ public class Deserializer {
             fieldSet.set(obj,objects[id]);
         }
 
+    }
+
+    private Object createArray(Class c, Element e){
+        int length = Integer.parseInt(e.getAttribute("length").getValue());
+        Class baseType = c.getComponentType();
+        Object obj = Array.newInstance(baseType,length);
+
+        if(baseType.isPrimitive()){
+            List<Element> childFields = e.getChildren();
+            for(int i = 0; i < childFields.size();i++){
+                Element el = childFields.get(i);
+                Array.set(obj,i,loadPrimitive(baseType,el.getValue()));
+            }
+        }
+        return obj;
+    }
+
+    private Object createPrimitive(Class c, Element e) throws InvocationTargetException, IllegalAccessException, NoSuchMethodException {
+        List<Element> childFields = e.getChildren();
+        Element value = childFields.get(0);
+        Object obj;
+        if(c.equals(String.class)){
+            obj = value.getValue();
+        }else{
+            Method valueMethod = c.getMethod("valueOf",String.class);
+            obj = valueMethod.invoke(null,value.getValue());
+        }
+
+        return obj;
+    }
+
+    private Object createArrayList(Element e){
+        ArrayList objArrayList = new ArrayList<>();
+        List<Element> children = e.getChildren();
+        for (Element el: children) {
+            objArrayList.add(null);
+        }
+        return objArrayList;
     }
 
     private boolean isType(Class clas){
